@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: Board(),
+      home: Board(Colors.lightGreen[100], Colors.green),
     );
   }
 }

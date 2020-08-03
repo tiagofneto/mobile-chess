@@ -3,9 +3,25 @@ import 'package:chess/piece.dart';
 import 'package:chess/tile.dart';
 
 class Board extends StatefulWidget {
-  List<List<Piece>> pieces;
+  final Color color1;
+  final Color color2;
 
-  Board() {
+  Board(this.color1, this.color2);
+
+  @override
+  _BoardState createState() => _BoardState();
+}
+
+class _BoardState extends State<Board> {
+  List<List<bool>> canMove;
+  List<List<Piece>> pieces;
+  Piece movingPiece;
+
+  @override
+  void initState() {
+    super.initState();
+    canMove = List.generate(8, (index) => List.generate(8, (index) => false));
+    movingPiece = null;
     _initialBoard();
   }
 
@@ -49,35 +65,38 @@ class Board extends StatefulWidget {
     }
   }
 
-  @override
-  _BoardState createState() => _BoardState();
-}
+  void _onTileClicked(Piece piece, Position tilePos) {
+    if (movingPiece == null) {
+      setState(() {
+        canMove =
+            List.generate(8, (index) => List.generate(8, (index) => false));
+      });
+      if (piece != null) {
+        movingPiece = piece;
+        //Getting valid move positions
+        for (List<Position> direction in piece.listMoves()) {
+          print("SWITCH");
+          for (Position pos in direction) {
+            print(
+                "Row: " + pos.row.toString() + " | Col: " + pos.col.toString());
+            // setState(() {
+            //   if (pieces[pos.row][pos.col].color == )
+            //   canMove[pos.row][pos.col] = true;
+            // });
+            Piece currPiece = pieces[pos.row][pos.col];
+            if (currPiece != null && currPiece.color == piece.color) break;
 
-class _BoardState extends State<Board> {
-  List<Tile> tiles;
+            setState(() {
+              canMove[pos.row][pos.col] = true;
+            });
 
-  @override
-  void initState() {
-    //BUILDING TILES
-    tiles = List<Tile>();
-    for (int row = 0; row < 8; row++) {
-      for (int col = 0; col < 8; col++) {
-        tiles.add(Tile(
-          _calculateTileColor(col, row),
-          widget.pieces[row][col],
-          onTileClicked: (Piece piece) {
-            print(piece.color + " " + piece.image);
-          },
-        ));
+            if (currPiece != null) break;
+          }
+        }
       }
+    } else {
+      //TODO
     }
-  }
-
-  Color _calculateTileColor(int col, int row) {
-    if ((row.isEven && col.isEven) || (row.isOdd && col.isOdd))
-      return Colors.lightGreen[100];
-    else
-      return Colors.green;
   }
 
   @override
@@ -88,8 +107,26 @@ class _BoardState extends State<Board> {
         ),
         body: GridView.count(
           crossAxisCount: 8,
-          // children: tiles.expand((element) => element).toList(),
-          children: tiles,
+          //TODO automap
+          // children: pieces.expand((piece) => Tile()).toList(),
+          children: List.generate(64, (index) {
+            int row = index ~/ 8;
+            int col = index % 8;
+            return Tile(
+              color: _calculateTileColor(col, row),
+              pos: Position(col, row),
+              piece: pieces[row][col],
+              onTileClicked: _onTileClicked,
+              canMove: canMove[row][col],
+            );
+          }),
         ));
+  }
+
+  Color _calculateTileColor(int col, int row) {
+    if ((row.isEven && col.isEven) || (row.isOdd && col.isOdd))
+      return widget.color1;
+    else
+      return widget.color2;
   }
 }
