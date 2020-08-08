@@ -2,13 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:chess/piece.dart';
 import 'package:chess/tile.dart';
 
+typedef void OnPieceKilled(Piece piece);
+
+//TODO create own gridview
 class Board extends StatefulWidget {
   final Color color1;
   final Color color2;
   final Color movingColor;
+  final bool reversed;
+  final OnPieceKilled onPieceKilled;
   //TODO add more colors
 
-  Board(this.color1, this.color2, this.movingColor);
+  Board(
+      {this.color1 = Colors.lightGreen,
+      this.color2 = Colors.green,
+      this.movingColor = Colors.pink,
+      this.onPieceKilled,
+      this.reversed = false});
 
   @override
   _BoardState createState() => _BoardState();
@@ -46,7 +56,7 @@ class _BoardState extends State<Board> {
   }
 
   String _initPieceName(int col) {
-    //TODO create env variables
+    //TODO enum
     switch (col) {
       case 0:
         return "rook";
@@ -74,6 +84,9 @@ class _BoardState extends State<Board> {
     if (movingPiece != null) {
       if (canMove[tilePos.row][tilePos.col]) {
         //FIXME lowercase
+        Piece targetPiece = pieces[tilePos.row][tilePos.col];
+        //TODO
+        if (targetPiece != null) widget.onPieceKilled(piece);
         pieces[tilePos.row][tilePos.col] = Piece(movingPiece.name.toLowerCase(),
             movingPiece.color, Position(tilePos.col, tilePos.row));
 
@@ -127,28 +140,28 @@ class _BoardState extends State<Board> {
     }
   }
 
+  List<Tile> _generateTiles() {}
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text("Chess"),
-        ),
-        body: GridView.count(
-          crossAxisCount: 8,
-          //TODO automap
-          // children: pieces.expand((piece) => Tile()).toList(),
-          children: List.generate(64, (index) {
-            int row = index ~/ 8;
-            int col = index % 8;
-            return Tile(
-              color: _calculateTileColor(col, row),
-              pos: Position(col, row),
-              piece: pieces[row][col],
-              onTileClicked: _onTileClicked,
-              canMove: canMove[row][col],
-            );
-          }),
-        ));
+    return GridView.count(
+      crossAxisCount: 8,
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      //TODO automap
+      // children: pieces.expand((piece) => Tile()).toList(),
+      children: List.generate(64, (index) {
+        int row = widget.reversed ? 7 - index ~/ 8 : index ~/ 8;
+        int col = widget.reversed ? 7 - index % 8 : index % 8;
+        return Tile(
+          color: _calculateTileColor(col, row),
+          pos: Position(col, row),
+          piece: pieces[row][col],
+          onTileClicked: _onTileClicked,
+          canMove: canMove[row][col],
+        );
+      }),
+    );
   }
 
   Color _calculateTileColor(int col, int row) {

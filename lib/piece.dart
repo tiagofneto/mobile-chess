@@ -84,8 +84,8 @@ class Knight extends Piece {
     moves[5] = Position.getMove(pos.col - 2, pos.row + 1);
     //RIGHT TOP
     moves[6] = Position.getMove(pos.col + 2, pos.row - 1);
-    //TOP LEFT
-    moves[7] = Position.getMove(pos.col - 2, pos.row + 1);
+    //RIGHT BOTTOM
+    moves[7] = Position.getMove(pos.col + 2, pos.row + 1);
 
     return moves;
   }

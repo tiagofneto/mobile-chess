@@ -1,5 +1,5 @@
+import 'package:chess/extras.dart';
 import 'package:flutter/material.dart';
-import 'package:chess/board.dart';
 
 void main() {
   runApp(MyApp());
@@ -14,7 +14,11 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: Board(Colors.lightGreen[100], Colors.green, Colors.pink),
+      home: Scaffold(
+          appBar: AppBar(
+            title: Text("Chess"),
+          ),
+          body: Game()),
     );
   }
 }

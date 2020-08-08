@@ -24,8 +24,17 @@ class Tile extends StatelessWidget {
     return GestureDetector(
       onTap: () => onTileClicked(piece, pos),
       child: Container(
-        child: piece,
-        color: canMove ? piece == null ? Colors.blue : Colors.red : color,
+        child: canMove
+            ? piece == null
+                ? Icon(Icons.fiber_manual_record, color: Colors.blue,)
+                : Stack(
+                    children: <Widget>[piece, Icon(Icons.fiber_manual_record, color: Colors.red,)],
+                    alignment: Alignment.center,
+                  )
+            : piece,
+        //TODO choose how the tiles are presented
+        // color: canMove ? piece == null ? Colors.blue : Colors.red : color,
+        color: color,
       ),
     );
   }
