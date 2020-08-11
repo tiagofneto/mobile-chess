@@ -4,6 +4,7 @@ import 'package:chess/tile.dart';
 
 typedef void OnPieceKilled(Piece piece);
 
+//TODO table instead of grid (no scrolling)
 //TODO create own gridview
 class Board extends StatefulWidget {
   final Color color1;
@@ -11,6 +12,7 @@ class Board extends StatefulWidget {
   final Color movingColor;
   final bool reversed;
   final OnPieceKilled onPieceKilled;
+  final VoidCallback onPlayerChanged;
   //TODO add more colors
 
   Board(
@@ -18,6 +20,7 @@ class Board extends StatefulWidget {
       this.color2 = Colors.green,
       this.movingColor = Colors.pink,
       this.onPieceKilled,
+      this.onPlayerChanged,
       this.reversed = false});
 
   @override
@@ -133,6 +136,7 @@ class _BoardState extends State<Board> {
   }
 
   void _swapPlayers() {
+    widget.onPlayerChanged();
     if (currentPlayer == "white") {
       currentPlayer = "black";
     } else {
