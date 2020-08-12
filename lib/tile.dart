@@ -14,7 +14,7 @@ class Tile extends StatelessWidget {
 
   Tile(
       {@required this.color,
-      @required this.pos,
+      this.pos,
       this.piece,
       this.onTileClicked,
       this.canMove = false});

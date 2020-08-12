@@ -1,4 +1,4 @@
-import 'package:chess/extras.dart';
+import 'package:chess/home.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -14,11 +14,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: Scaffold(
-          appBar: AppBar(
-            title: Text("Chess"),
-          ),
-          body: Game()),
+      home: Home(),
     );
   }
 }

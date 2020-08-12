@@ -16,8 +16,8 @@ class Board extends StatefulWidget {
   //TODO add more colors
 
   Board(
-      {this.color1 = Colors.lightGreen,
-      this.color2 = Colors.green,
+      {@required this.color1,
+      @required this.color2,
       this.movingColor = Colors.pink,
       this.onPieceKilled,
       this.onPlayerChanged,
