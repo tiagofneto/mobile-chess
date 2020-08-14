@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:equatable/equatable.dart';
 
 import 'package:flutter/material.dart';
 import 'package:chess/piece.dart';
@@ -26,9 +27,18 @@ class Tile extends StatelessWidget {
       child: Container(
         child: canMove
             ? piece == null
-                ? Icon(Icons.fiber_manual_record, color: Colors.blue,)
+                ? Icon(
+                    Icons.fiber_manual_record,
+                    color: Colors.blue,
+                  )
                 : Stack(
-                    children: <Widget>[piece, Icon(Icons.fiber_manual_record, color: Colors.red,)],
+                    children: <Widget>[
+                      piece,
+                      Icon(
+                        Icons.fiber_manual_record,
+                        color: Colors.red,
+                      )
+                    ],
                     alignment: Alignment.center,
                   )
             : piece,
@@ -40,7 +50,7 @@ class Tile extends StatelessWidget {
   }
 }
 
-class Position {
+class Position extends Equatable {
   final int col;
   final int row;
 
@@ -49,6 +59,9 @@ class Position {
       throw "Out of bounds!";
     }
   }
+
+  @override
+  List<Object> get props => [col, row];
 
   static List<Position> getMove(int currentCol, int currentRow) {
     try {

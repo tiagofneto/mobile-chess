@@ -3,6 +3,7 @@ import 'package:chess/piece.dart';
 import 'package:chess/tile.dart';
 
 typedef void OnPieceKilled(Piece piece);
+typedef void OnCheck(String currentPlayer);
 
 //TODO table instead of grid (no scrolling)
 //TODO create own gridview
@@ -12,6 +13,8 @@ class Board extends StatefulWidget {
   final Color movingColor;
   final bool reversed;
   final OnPieceKilled onPieceKilled;
+  final OnCheck onCheck;
+  final OnCheck onCheckmate;
   final VoidCallback onPlayerChanged;
   //TODO add more colors
 
@@ -20,6 +23,8 @@ class Board extends StatefulWidget {
       @required this.color2,
       this.movingColor = Colors.pink,
       this.onPieceKilled,
+      this.onCheck,
+      this.onCheckmate,
       this.onPlayerChanged,
       this.reversed = false});
 
@@ -84,6 +89,7 @@ class _BoardState extends State<Board> {
 
   //TODO optimize
   void _onTileClicked(Piece piece, Position tilePos) {
+    //MOVING PIECE
     if (movingPiece != null) {
       if (canMove[tilePos.row][tilePos.col]) {
         //FIXME lowercase
@@ -95,39 +101,51 @@ class _BoardState extends State<Board> {
 
         pieces[movingPiece.pos.row][movingPiece.pos.col] = null;
         _swapPlayers();
+        if (_check(currentPlayer)) widget.onCheck(currentPlayer);
       }
       setState(_clearMoves);
-    } else {
+    }
+    //CHOOSING PIECE TO MOVE
+    else {
       setState(_clearMoves);
       if (piece != null && piece.color == currentPlayer) {
         movingPiece = piece;
-        //Getting valid move positions
-        List<List<Position>> moves = piece.listMoves();
-        for (List<Position> direction in moves) {
-          for (Position pos in direction) {
-            Piece currPiece = pieces[pos.row][pos.col];
-            if (currPiece != null && currPiece.color == piece.color) break;
-
-            //FIXME lowercase
-            if (piece.name.toLowerCase() == "pawn") {
-              int index = moves.indexOf(direction);
-              //Can only move diagonal to eat
-              if (currPiece == null) {
-                if (index == 0 || index == 2) break;
-              } else {
-                if (index == 1) break;
-              }
-            }
-
-            setState(() {
-              canMove[pos.row][pos.col] = true;
-            });
-
-            if (currPiece != null) break;
-          }
-        }
+        _validMoves(piece).forEach((pos) {
+          setState(() {
+            canMove[pos.row][pos.col] = true;
+          });
+        });
       }
     }
+  }
+
+  List<Position> _validMoves(Piece piece) {
+    
+    List<Position> validMoves = List<Position>();
+    List<List<Position>> moves = piece.listMoves();
+    for (List<Position> direction in moves) {
+      for (Position pos in direction) {
+        Piece currPiece = pieces[pos.row][pos.col];
+        if (currPiece != null && currPiece.color == piece.color) break;
+
+        //FIXME lowercase
+        if (piece is Pawn) {
+          int index = moves.indexOf(direction);
+          //Can only move diagonal to eat
+          if (currPiece == null) {
+            if (index == 0 || index == 2) break;
+          } else {
+            if (index == 1) break;
+          }
+        }
+
+        validMoves.add(pos);
+
+        if (currPiece != null) break;
+      }
+    }
+
+    return validMoves;
   }
 
   void _clearMoves() {
@@ -144,7 +162,52 @@ class _BoardState extends State<Board> {
     }
   }
 
-  List<Tile> _generateTiles() {}
+  //Checks if the king with the given color is in check
+  bool _check(String color) {
+    King king;
+    for (List<Piece> row in pieces) {
+      for (Piece piece in row) {
+        //FIXME lowercase
+        if (piece != null && piece is King && piece.color == color) {
+          king = piece;
+        }
+      }
+    }
+
+    for (List<Piece> row in pieces) {
+      for (Piece piece in row) {
+        if (piece != null &&
+            piece.color != color &&
+            _validMoves(piece).contains(king.pos)) return true;
+      }
+    }
+
+    return false;
+  }
+
+  List<Tile> _generateTiles() {
+    return List.generate(64, (index) {
+      int row = widget.reversed ? 7 - index ~/ 8 : index ~/ 8;
+      int col = widget.reversed ? 7 - index % 8 : index % 8;
+      return Tile(
+        color: _calculateTileColor(col, row),
+        pos: Position(col, row),
+        piece: pieces[row][col],
+        onTileClicked: _onTileClicked,
+        canMove: canMove[row][col],
+      );
+    });
+  }
+
+  Color _calculateTileColor(int col, int row) {
+    if (movingPiece != null) if (movingPiece.pos == Position(col, row))
+      return widget.movingColor;
+
+    if ((row.isEven && col.isEven) || (row.isOdd && col.isOdd))
+      return widget.color1;
+    else
+      return widget.color2;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -154,27 +217,7 @@ class _BoardState extends State<Board> {
       physics: NeverScrollableScrollPhysics(),
       //TODO automap
       // children: pieces.expand((piece) => Tile()).toList(),
-      children: List.generate(64, (index) {
-        int row = widget.reversed ? 7 - index ~/ 8 : index ~/ 8;
-        int col = widget.reversed ? 7 - index % 8 : index % 8;
-        return Tile(
-          color: _calculateTileColor(col, row),
-          pos: Position(col, row),
-          piece: pieces[row][col],
-          onTileClicked: _onTileClicked,
-          canMove: canMove[row][col],
-        );
-      }),
+      children: _generateTiles(),
     );
-  }
-
-  Color _calculateTileColor(int col, int row) {
-    if (movingPiece != null) if (movingPiece.pos.col == col &&
-        movingPiece.pos.row == row) return widget.movingColor;
-
-    if ((row.isEven && col.isEven) || (row.isOdd && col.isOdd))
-      return widget.color1;
-    else
-      return widget.color2;
   }
 }

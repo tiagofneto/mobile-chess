@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:chess/game.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:carousel_slider/carousel_state.dart';
 
 typedef void OnPressed();
 
@@ -54,6 +55,7 @@ class Settings extends StatelessWidget {
 }
 
 //TODO show preview of colors
+//TODO carrousel slider for boards
 class SettingsOption extends StatelessWidget {
   final int value;
   final String text;

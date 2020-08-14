@@ -39,6 +39,12 @@ class _GameState extends State<Game> {
     });
   }
 
+  //TODO stop timer
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   void _onPieceKilled(Piece piece) {
     setState(() {
       if (piece.color == "white") {
@@ -93,6 +99,9 @@ class _GameState extends State<Game> {
             color2: widget.color2,
             onPieceKilled: _onPieceKilled,
             onPlayerChanged: _onPlayerChanged,
+            onCheck: (String currentPlayer) {
+              print(currentPlayer + " is on check");
+            },
           ),
           DeadPieces(blackKilled),
           PlayerHeader(
