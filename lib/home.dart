@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:chess/game.dart';
+import 'package:chess/settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:carousel_slider/carousel_state.dart';
 
 typedef void OnPressed();
 
@@ -37,50 +37,13 @@ class HomeBut extends StatelessWidget {
   }
 }
 
-class Settings extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return SimpleDialog(
-      title: Text(
-        "Choose a color combination",
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
-      children: <Widget>[
-        SettingsOption(text: "Pattern 1", value: 0),
-        Divider(),
-        SettingsOption(text: "Pattern 2", value: 1),
-      ],
-    );
-  }
-}
-
-//TODO show preview of colors
-//TODO carrousel slider for boards
-class SettingsOption extends StatelessWidget {
-  final int value;
-  final String text;
-
-  SettingsOption({@required this.value, @required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return SimpleDialogOption(
-      child: Text(text),
-      onPressed: () async {
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        prefs.setInt('boardColor', value);
-        Navigator.pop(context);
-      },
-    );
-  }
-}
-
 class Home extends StatelessWidget {
   Future<Color> _getColorPreferences(bool primary) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final int colorPreference = prefs.getInt('boardColor') ?? 0;
 
     if (primary) {
+      //TODO carousel constants
       switch (colorPreference) {
         case 0:
           return Colors.lightGreen[100];
@@ -126,9 +89,11 @@ class Home extends StatelessWidget {
           HomeBut(
             text: "Settings",
             onPressed: () {
-              showDialog(
-                context: context,
-                builder: (_) => Settings(),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Settings(),
+                ),
               );
             },
           )

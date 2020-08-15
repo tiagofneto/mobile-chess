@@ -18,15 +18,16 @@ class Board extends StatefulWidget {
   final VoidCallback onPlayerChanged;
   //TODO add more colors
 
-  Board(
-      {@required this.color1,
-      @required this.color2,
-      this.movingColor = Colors.pink,
-      this.onPieceKilled,
-      this.onCheck,
-      this.onCheckmate,
-      this.onPlayerChanged,
-      this.reversed = false});
+  Board({
+    @required this.color1,
+    @required this.color2,
+    this.movingColor = Colors.pink,
+    this.onPieceKilled,
+    this.onCheck,
+    this.onCheckmate,
+    this.onPlayerChanged,
+    this.reversed = false,
+  });
 
   @override
   _BoardState createState() => _BoardState();
@@ -38,6 +39,7 @@ class _BoardState extends State<Board> {
   //TODO change movignPiece to bool
   Piece movingPiece;
   String currentPlayer;
+  bool over;
 
   @override
   void initState() {
@@ -45,6 +47,7 @@ class _BoardState extends State<Board> {
     _clearMoves();
     _initialBoard();
     currentPlayer = "white";
+    over = false;
   }
 
   void _initialBoard() {
@@ -88,39 +91,38 @@ class _BoardState extends State<Board> {
   }
 
   //TODO optimize
-  void _onTileClicked(Piece piece, Position tilePos) {
-    //MOVING PIECE
-    if (movingPiece != null) {
-      if (canMove[tilePos.row][tilePos.col]) {
-        //FIXME lowercase
-        Piece targetPiece = pieces[tilePos.row][tilePos.col];
-        //TODO
-        if (targetPiece != null) widget.onPieceKilled(piece);
-        pieces[tilePos.row][tilePos.col] = Piece(movingPiece.name.toLowerCase(),
-            movingPiece.color, Position(tilePos.col, tilePos.row));
-
-        pieces[movingPiece.pos.row][movingPiece.pos.col] = null;
-        _swapPlayers();
-        if (_check(currentPlayer)) widget.onCheck(currentPlayer);
+  void _onTileClicked(Position tilePos) {
+    if (!over) {
+      //MOVING PIECE
+      if (movingPiece != null) {
+        if (canMove[tilePos.row][tilePos.col]) {
+          Piece killedPiece = _movePiece(movingPiece, tilePos);
+          if (killedPiece is King) over = true;
+          if (killedPiece != null) widget.onPieceKilled(killedPiece);
+          _swapPlayers();
+          //TODO fix moving own piece not triggering check
+          if (!over && _check(currentPlayer)) widget.onCheck(currentPlayer);
+        }
+        setState(_clearMoves);
       }
-      setState(_clearMoves);
-    }
-    //CHOOSING PIECE TO MOVE
-    else {
-      setState(_clearMoves);
-      if (piece != null && piece.color == currentPlayer) {
-        movingPiece = piece;
-        _validMoves(piece).forEach((pos) {
-          setState(() {
-            canMove[pos.row][pos.col] = true;
+      //CHOOSING PIECE TO MOVE
+      else {
+        setState(_clearMoves);
+        Piece piece = pieces[tilePos.row][tilePos.col];
+        if (piece != null && piece.color == currentPlayer) {
+          movingPiece = piece;
+          _validMoves(piece).forEach((pos) {
+            setState(() {
+              canMove[pos.row][pos.col] = true;
+            });
           });
-        });
+        }
       }
     }
   }
 
+  //TODO remove move placing own king in check
   List<Position> _validMoves(Piece piece) {
-    
     List<Position> validMoves = List<Position>();
     List<List<Position>> moves = piece.listMoves();
     for (List<Position> direction in moves) {
@@ -151,6 +153,23 @@ class _BoardState extends State<Board> {
   void _clearMoves() {
     movingPiece = null;
     canMove = List.generate(8, (index) => List.generate(8, (index) => false));
+  }
+
+  //Moves piece and returns the killed piece, null if no piece was killed
+  Piece _movePiece(Piece piece, Position tilePos) {
+    if (tilePos == piece.pos) throw "Moving to same position!";
+
+    Piece targetPiece = pieces[tilePos.row][tilePos.col];
+    pieces[tilePos.row][tilePos.col] = Piece(
+      //FIXME lowercase
+      piece.name.toLowerCase(),
+      piece.color,
+      tilePos,
+    );
+
+    pieces[piece.pos.row][piece.pos.col] = null;
+
+    return targetPiece;
   }
 
   void _swapPlayers() {
@@ -200,7 +219,7 @@ class _BoardState extends State<Board> {
   }
 
   Color _calculateTileColor(int col, int row) {
-    if (movingPiece != null) if (movingPiece.pos == Position(col, row))
+    if (movingPiece != null && movingPiece.pos == Position(col, row))
       return widget.movingColor;
 
     if ((row.isEven && col.isEven) || (row.isOdd && col.isOdd))

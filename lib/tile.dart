@@ -4,7 +4,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:chess/piece.dart';
 
-typedef void OnTileClicked(Piece piece, Position pos);
+typedef void OnTileClicked(Position pos);
 
 class Tile extends StatelessWidget {
   final Piece piece;
@@ -23,7 +23,7 @@ class Tile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => onTileClicked(piece, pos),
+      onTap: () => onTileClicked(pos),
       child: Container(
         child: canMove
             ? piece == null

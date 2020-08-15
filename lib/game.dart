@@ -100,7 +100,10 @@ class _GameState extends State<Game> {
             onPieceKilled: _onPieceKilled,
             onPlayerChanged: _onPlayerChanged,
             onCheck: (String currentPlayer) {
-              print(currentPlayer + " is on check");
+              showDialog(
+                context: context,
+                builder: (_) => CheckIndicator(currentPlayer),
+              );
             },
           ),
           DeadPieces(blackKilled),

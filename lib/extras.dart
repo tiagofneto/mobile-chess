@@ -78,3 +78,23 @@ class PlayerHeader extends StatelessWidget {
     );
   }
 }
+
+class CheckIndicator extends StatelessWidget {
+  final String player;
+
+  CheckIndicator(this.player);
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text("Check on " + player),
+      content: Text("The " + player + " king is on check! Defend it!"),
+      actions: [
+        FlatButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text("Close"),
+        ),
+      ],
+    );
+  }
+}
