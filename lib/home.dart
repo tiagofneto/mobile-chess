@@ -38,12 +38,8 @@ class HomeBut extends StatelessWidget {
 }
 
 class Home extends StatelessWidget {
-  Future<Color> _getColorPreferences(bool primary) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final int colorPreference = prefs.getInt('boardColor') ?? 0;
-
+  Color _convertColorPreference(int colorPreference, bool primary) {
     if (primary) {
-      //TODO carousel constants
       switch (colorPreference) {
         case 0:
           return Colors.lightGreen[100];
@@ -74,25 +70,34 @@ class Home extends StatelessWidget {
           HomeBut(
             text: "Play",
             onPressed: () async {
-              Color color1 = await _getColorPreferences(true);
-              Color color2 = await _getColorPreferences(false);
+              final SharedPreferences prefs = await SharedPreferences.getInstance();
+              final int colorPreference = prefs.getInt('boardColor') ?? 0;
+              Color color1 = _convertColorPreference(colorPreference, true);
+              Color color2 = _convertColorPreference(colorPreference, false);
+              String name1 = prefs.getString('player1') ?? "Player 1";
+              String name2 = prefs.getString('player2') ?? "Player 2";
+
               Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (context) => Game(
                           color1: color1,
                           color2: color2,
+                          name1: name1,
+                          name2: name2,
                         )),
               );
             },
           ),
           HomeBut(
             text: "Settings",
-            onPressed: () {
+            onPressed: () async {
+              final SharedPreferences prefs = await SharedPreferences.getInstance();
+              final int colorPreference = prefs.getInt('boardColor') ?? 0;
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => Settings(),
+                  builder: (context) => Settings(initialPage: colorPreference),
                 ),
               );
             },

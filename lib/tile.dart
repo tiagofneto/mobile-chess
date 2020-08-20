@@ -42,8 +42,6 @@ class Tile extends StatelessWidget {
                     alignment: Alignment.center,
                   )
             : piece,
-        //TODO choose how the tiles are presented
-        // color: canMove ? piece == null ? Colors.blue : Colors.red : color,
         color: color,
       ),
     );
@@ -71,7 +69,6 @@ class Position extends Equatable {
     }
   }
 
-  //TODO return iterator or list
   List<List<Position>> getStraight() {
     List<List<Position>> moves = List<List<Position>>(4);
 

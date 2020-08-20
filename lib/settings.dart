@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Settings extends StatelessWidget {
-  Settings() {
-    _setBoardColor(0);
-  }
+  final int initialPage;
+
+  Settings({this.initialPage});
 
   _setBoardColor(int page) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -18,44 +18,70 @@ class Settings extends StatelessWidget {
       appBar: AppBar(
         title: Text('Settings'),
       ),
-      body: CarouselSlider(
-        items: [
-          CarouselItem(
-            value: 0,
-            color1: Colors.lightGreen,
-            color2: Colors.green,
+      body: ListView(
+        children: [
+          SettingsTitle("Board color"),
+          CarouselSlider(
+            items: [
+              Image.asset('assets/images/greenBoard.png'),
+              Image.asset('assets/images/blueYellowBoard.png'),
+            ],
+            options: CarouselOptions(
+              initialPage: initialPage,
+              enlargeCenterPage: true,
+              onPageChanged: (int page, _) => _setBoardColor(page),
+            ),
           ),
-          CarouselItem(
-            value: 1,
-            color1: Colors.yellow,
-            color2: Colors.lightBlue,
+          Divider(
+            thickness: 2,
           ),
+          SettingsTitle("Player names"),
+          PlayerName("player1", "Player 1"),
+          PlayerName("player2", "Player 2"),
         ],
-        options: CarouselOptions(
-          enlargeCenterPage: true,
-          onPageChanged: (int page, _) => _setBoardColor(page),
+      ),
+    );
+  }
+}
+
+class SettingsTitle extends StatelessWidget {
+  final String title;
+
+  SettingsTitle(this.title);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(10),
+      alignment: Alignment.centerLeft,
+      child: Text(
+        title,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 20,
         ),
       ),
     );
   }
 }
 
-class CarouselItem extends StatelessWidget {
-  final int value;
-  final Color color1;
-  final Color color2;
+class PlayerName extends StatelessWidget {
+  final String name;
+  final String hint;
 
-  CarouselItem(
-      {@required this.value, @required this.color1, @required this.color2});
+  PlayerName(this.name, this.hint);
 
   @override
   Widget build(BuildContext context) {
-    return GridView.count(
-        crossAxisCount: 2,
-        children: List.generate(
-          2,
-          (index) =>
-              index == 0 ? Container(color: color1) : Container(color: color2),
-        ));
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10),
+      child: TextField(
+        onChanged: (value) async {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          prefs.setString(name, value);
+        },
+        decoration: InputDecoration(hintText: hint),
+      ),
+    );
   }
 }

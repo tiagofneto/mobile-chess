@@ -1,3 +1,4 @@
+import 'package:chess/piece.dart';
 import 'package:flutter/material.dart';
 
 //FIXME height when empty
@@ -9,11 +10,6 @@ class DeadPieces extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //TODO listview
-    // return ListView.builder(
-    //   shrinkWrap: true,
-    //   itemCount: 10,
-    //   itemBuilder: (_, index) => Text("TOP"),
-    // );
     return Scrollbar(
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -28,7 +24,6 @@ class DeadPieces extends StatelessWidget {
   }
 }
 
-//TODO Update to ListTile
 class PlayerHeader extends StatelessWidget {
   final String name;
   final String time;
@@ -45,7 +40,6 @@ class PlayerHeader extends StatelessWidget {
         children: <Widget>[
           Container(
             //TODO don't grow with name
-            //TODO fading animation color
             decoration: BoxDecoration(
               color: currentPlayer ? Colors.green : Colors.yellow,
               borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -80,15 +74,15 @@ class PlayerHeader extends StatelessWidget {
 }
 
 class CheckIndicator extends StatelessWidget {
-  final String player;
+  final PieceColors player;
 
   CheckIndicator(this.player);
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text("Check on " + player),
-      content: Text("The " + player + " king is on check! Defend it!"),
+      title: Text("Check on " + player.toString().split('.').last),
+      content: Text("The " + player.toString().split('.').last + " king is on check! Defend it!"),
       actions: [
         FlatButton(
           onPressed: () => Navigator.of(context).pop(),

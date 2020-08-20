@@ -3,10 +3,9 @@ import 'package:chess/piece.dart';
 import 'package:chess/tile.dart';
 
 typedef void OnPieceKilled(Piece piece);
-typedef void OnCheck(String currentPlayer);
+typedef void OnCheck(PieceColors currentPlayer);
 
-//TODO table instead of grid (no scrolling)
-//TODO create own gridview
+//TODO custom gridview
 class Board extends StatefulWidget {
   final Color color1;
   final Color color2;
@@ -16,7 +15,6 @@ class Board extends StatefulWidget {
   final OnCheck onCheck;
   final OnCheck onCheckmate;
   final VoidCallback onPlayerChanged;
-  //TODO add more colors
 
   Board({
     @required this.color1,
@@ -38,7 +36,7 @@ class _BoardState extends State<Board> {
   List<List<Piece>> pieces;
   //TODO change movignPiece to bool
   Piece movingPiece;
-  String currentPlayer;
+  PieceColors currentPlayer;
   bool over;
 
   @override
@@ -46,45 +44,44 @@ class _BoardState extends State<Board> {
     super.initState();
     _clearMoves();
     _initialBoard();
-    currentPlayer = "white";
+    currentPlayer = PieceColors.white;
     over = false;
   }
 
   void _initialBoard() {
     pieces = List.generate(8, (row) {
       return List.generate(8, (col) {
-        String pieceColor;
-        row <= 1 ? pieceColor = "black" : pieceColor = "white";
+        PieceColors pieceColor;
+        row <= 1 ? pieceColor = PieceColors.black : pieceColor = PieceColors.white;
         Piece piece;
         if (row == 0 || row == 7) {
-          piece = Piece(_initPieceName(col), pieceColor, Position(col, row));
+          piece = Piece(_initPiece(col), pieceColor, Position(col, row));
         } else if (row == 1 || row == 6) {
-          piece = Piece("pawn", pieceColor, Position(col, row));
+          piece = Piece(Pieces.Pawn, pieceColor, Position(col, row));
         }
         return piece;
       });
     });
   }
 
-  String _initPieceName(int col) {
-    //TODO enum
+  Pieces _initPiece(int col) {
     switch (col) {
       case 0:
-        return "rook";
+        return Pieces.Rook;
       case 1:
-        return "knight";
+        return Pieces.Knight;
       case 2:
-        return "bishop";
+        return Pieces.Bishop;
       case 3:
-        return "queen";
+        return Pieces.Queen;
       case 4:
-        return "king";
+        return Pieces.King;
       case 5:
-        return "bishop";
+        return Pieces.Bishop;
       case 6:
-        return "knight";
+        return Pieces.Knight;
       case 7:
-        return "rook";
+        return Pieces.Rook;
       default:
         return null;
     }
@@ -100,7 +97,7 @@ class _BoardState extends State<Board> {
           if (killedPiece is King) over = true;
           if (killedPiece != null) widget.onPieceKilled(killedPiece);
           _swapPlayers();
-          //TODO fix moving own piece not triggering check
+          //FIXME own piece not triggering check
           if (!over && _check(currentPlayer)) widget.onCheck(currentPlayer);
         }
         setState(_clearMoves);
@@ -121,7 +118,7 @@ class _BoardState extends State<Board> {
     }
   }
 
-  //TODO remove move placing own king in check
+  //FIXME remove move placing own king in check
   List<Position> _validMoves(Piece piece) {
     List<Position> validMoves = List<Position>();
     List<List<Position>> moves = piece.listMoves();
@@ -130,7 +127,6 @@ class _BoardState extends State<Board> {
         Piece currPiece = pieces[pos.row][pos.col];
         if (currPiece != null && currPiece.color == piece.color) break;
 
-        //FIXME lowercase
         if (piece is Pawn) {
           int index = moves.indexOf(direction);
           //Can only move diagonal to eat
@@ -161,8 +157,7 @@ class _BoardState extends State<Board> {
 
     Piece targetPiece = pieces[tilePos.row][tilePos.col];
     pieces[tilePos.row][tilePos.col] = Piece(
-      //FIXME lowercase
-      piece.name.toLowerCase(),
+      piece.type,
       piece.color,
       tilePos,
     );
@@ -174,19 +169,18 @@ class _BoardState extends State<Board> {
 
   void _swapPlayers() {
     widget.onPlayerChanged();
-    if (currentPlayer == "white") {
-      currentPlayer = "black";
+    if (currentPlayer == PieceColors.white) {
+      currentPlayer = PieceColors.black;
     } else {
-      currentPlayer = "white";
+      currentPlayer = PieceColors.white;
     }
   }
 
   //Checks if the king with the given color is in check
-  bool _check(String color) {
+  bool _check(PieceColors color) {
     King king;
     for (List<Piece> row in pieces) {
       for (Piece piece in row) {
-        //FIXME lowercase
         if (piece != null && piece is King && piece.color == color) {
           king = piece;
         }

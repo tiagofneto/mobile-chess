@@ -8,8 +8,10 @@ import 'package:flutter/material.dart';
 class Game extends StatefulWidget {
   final Color color1;
   final Color color2;
+  final String name1;
+  final String name2;
 
-  Game({this.color1, this.color2});
+  Game({this.color1, this.color2, this.name1, this.name2});
 
   @override
   _GameState createState() => _GameState();
@@ -47,7 +49,7 @@ class _GameState extends State<Game> {
 
   void _onPieceKilled(Piece piece) {
     setState(() {
-      if (piece.color == "white") {
+      if (piece.color == PieceColors.white) {
         whiteKilled.add(piece);
       } else {
         blackKilled.add(piece);
@@ -68,7 +70,7 @@ class _GameState extends State<Game> {
     });
   }
 
-  //TODO find more automatic alternative
+  //TODO find automatic alternative
   String _timeFormat(Stopwatch timer) {
     int mins = timer.elapsed.inMinutes;
     int secs = timer.elapsed.inSeconds % Duration.secondsPerMinute;
@@ -89,7 +91,7 @@ class _GameState extends State<Game> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
           PlayerHeader(
-            name: "Player 1",
+            name: widget.name1,
             time: _timeFormat(timer1),
             currentPlayer: firstPlayer,
           ),
@@ -99,7 +101,7 @@ class _GameState extends State<Game> {
             color2: widget.color2,
             onPieceKilled: _onPieceKilled,
             onPlayerChanged: _onPlayerChanged,
-            onCheck: (String currentPlayer) {
+            onCheck: (PieceColors currentPlayer) {
               showDialog(
                 context: context,
                 builder: (_) => CheckIndicator(currentPlayer),
@@ -108,7 +110,7 @@ class _GameState extends State<Game> {
           ),
           DeadPieces(blackKilled),
           PlayerHeader(
-            name: "Player 2",
+            name: widget.name2,
             time: _timeFormat(timer2),
             currentPlayer: !firstPlayer,
           ),
